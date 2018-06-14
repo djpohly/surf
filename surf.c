@@ -106,7 +106,7 @@ typedef struct Client {
 	WebKitHitTestResult *mousepos;
 	GTlsCertificateFlags tlsflags;
 	Window xid;
-	int progress, fullscreen;
+	int progress, fullscreen, mode;
 	const char *title, *overtitle, *targeturi;
 	const char *needle;
 	struct Client *next;
@@ -205,6 +205,7 @@ static void destroywin(GtkWidget* w, Client *c);
 
 /* Hotkeys */
 static void pasteuri(GtkClipboard *clipboard, const char *text, gpointer d);
+static void setmode(Client *c, const Arg *a);
 static void reload(Client *c, const Arg *a);
 static void print(Client *c, const Arg *a);
 static void clipboard(Client *c, const Arg *a);
@@ -1101,7 +1102,7 @@ processx(GdkXEvent *e, GdkEvent *event, gpointer d)
 gboolean
 winevent(GtkWidget *w, GdkEvent *e, Client *c)
 {
-	int i;
+	Key *k;
 
 	switch (e->type) {
 	case GDK_ENTER_NOTIFY:
@@ -1110,16 +1111,17 @@ winevent(GtkWidget *w, GdkEvent *e, Client *c)
 		break;
 	case GDK_KEY_PRESS:
 		if (!curconfig[KioskMode].val.b) {
-			for (i = 0; i < LENGTH(keys); ++i) {
+			for (k = keys[c->mode]; k->keyval; ++k) {
 				if (gdk_keyval_to_lower(e->key.keyval) ==
-				    keys[i].keyval &&
-				    CLEANMASK(e->key.state) == keys[i].mod &&
-				    keys[i].func) {
+				    k->keyval &&
+				    CLEANMASK(e->key.state) == k->mod &&
+				    k->func) {
 					updatewinid(c);
-					keys[i].func(c, &(keys[i].arg));
+					k->func(c, &(k->arg));
 					return TRUE;
 				}
 			}
+			return k->arg.b;
 		}
 	case GDK_LEAVE_NOTIFY:
 		c->overtitle = NULL;
@@ -1467,6 +1469,13 @@ pasteuri(GtkClipboard *clipboard, const char *text, gpointer d)
 	Arg a = {.v = text };
 	if (text)
 		loaduri((Client *) d, &a);
+}
+
+void
+setmode(Client *c, const Arg *a)
+{
+	if (a->i >= 0 && a->i < LENGTH(keys))
+		c->mode = a->i;
 }
 
 void

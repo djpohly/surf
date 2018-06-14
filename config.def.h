@@ -99,58 +99,75 @@ static SiteStyle styles[] = {
  * If you use anything else but MODKEY and GDK_SHIFT_MASK, don't forget to
  * edit the CLEANMASK() macro.
  */
-static Key keys[] = {
-	/* modifier              keyval          function    arg */
-	{ MODKEY,                GDK_KEY_g,      spawn,      SETPROP("_SURF_URI", "_SURF_GO") },
-	{ MODKEY,                GDK_KEY_f,      spawn,      SETPROP("_SURF_FIND", "_SURF_FIND") },
-	{ MODKEY,                GDK_KEY_slash,  spawn,      SETPROP("_SURF_FIND", "_SURF_FIND") },
+enum mode {
+	/* First mode listed will be default for new clients */
+	MODE_INSERT,
+	MODE_NORMAL,
+};
+static Key *keys[] = {
+	[MODE_INSERT] = (Key[]) {
+		/* modifier              keyval          function    arg */
+		{ MODKEY,                GDK_KEY_g,      spawn,      SETPROP("_SURF_URI", "_SURF_GO") },
+		{ MODKEY,                GDK_KEY_f,      spawn,      SETPROP("_SURF_FIND", "_SURF_FIND") },
+		{ MODKEY,                GDK_KEY_slash,  spawn,      SETPROP("_SURF_FIND", "_SURF_FIND") },
 
-	{ 0,                     GDK_KEY_Escape, stop,       { 0 } },
-	{ MODKEY,                GDK_KEY_c,      stop,       { 0 } },
+		{ 0,                     GDK_KEY_Escape, stop,       { 0 } },
+		{ MODKEY,                GDK_KEY_c,      stop,       { 0 } },
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_r,      reload,     { .b = 1 } },
-	{ MODKEY,                GDK_KEY_r,      reload,     { .b = 0 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_r,      reload,     { .b = 1 } },
+		{ MODKEY,                GDK_KEY_r,      reload,     { .b = 0 } },
 
-	{ MODKEY,                GDK_KEY_l,      navigate,   { .i = +1 } },
-	{ MODKEY,                GDK_KEY_h,      navigate,   { .i = -1 } },
+		{ MODKEY,                GDK_KEY_l,      navigate,   { .i = +1 } },
+		{ MODKEY,                GDK_KEY_h,      navigate,   { .i = -1 } },
 
-	/* Currently we have to use scrolling steps that WebKit2GTK+ gives us
-	 * d: step down, u: step up, r: step right, l:step left
-	 * D: page down, U: page up */
-	{ MODKEY,                GDK_KEY_j,      scroll,     { .i = 'd' } },
-	{ MODKEY,                GDK_KEY_k,      scroll,     { .i = 'u' } },
-	{ MODKEY,                GDK_KEY_b,      scroll,     { .i = 'U' } },
-	{ MODKEY,                GDK_KEY_space,  scroll,     { .i = 'D' } },
-	{ MODKEY,                GDK_KEY_i,      scroll,     { .i = 'r' } },
-	{ MODKEY,                GDK_KEY_u,      scroll,     { .i = 'l' } },
+		/* Currently we have to use scrolling steps that WebKit2GTK+ gives us
+		 * d: step down, u: step up, r: step right, l:step left
+		 * D: page down, U: page up */
+		{ MODKEY,                GDK_KEY_j,      scroll,     { .i = 'd' } },
+		{ MODKEY,                GDK_KEY_k,      scroll,     { .i = 'u' } },
+		{ MODKEY,                GDK_KEY_b,      scroll,     { .i = 'U' } },
+		{ MODKEY,                GDK_KEY_space,  scroll,     { .i = 'D' } },
+		{ MODKEY,                GDK_KEY_i,      scroll,     { .i = 'r' } },
+		{ MODKEY,                GDK_KEY_u,      scroll,     { .i = 'l' } },
 
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_j,      zoom,       { .i = -1 } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_k,      zoom,       { .i = +1 } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_q,      zoom,       { .i = 0  } },
-	{ MODKEY,                GDK_KEY_minus,  zoom,       { .i = -1 } },
-	{ MODKEY,                GDK_KEY_plus,   zoom,       { .i = +1 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_j,      zoom,       { .i = -1 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_k,      zoom,       { .i = +1 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_q,      zoom,       { .i = 0  } },
+		{ MODKEY,                GDK_KEY_minus,  zoom,       { .i = -1 } },
+		{ MODKEY,                GDK_KEY_plus,   zoom,       { .i = +1 } },
 
-	{ MODKEY,                GDK_KEY_p,      clipboard,  { .b = 1 } },
-	{ MODKEY,                GDK_KEY_y,      clipboard,  { .b = 0 } },
+		{ MODKEY,                GDK_KEY_p,      clipboard,  { .b = 1 } },
+		{ MODKEY,                GDK_KEY_y,      clipboard,  { .b = 0 } },
 
-	{ MODKEY,                GDK_KEY_n,      find,       { .i = +1 } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_n,      find,       { .i = -1 } },
+		{ MODKEY,                GDK_KEY_n,      find,       { .i = +1 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_n,      find,       { .i = -1 } },
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_p,      print,      { 0 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_p,      print,      { 0 } },
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_a,      togglecookiepolicy, { 0 } },
-	{ 0,                     GDK_KEY_F11,    togglefullscreen, { 0 } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_o,      toggleinspector, { 0 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_a,      togglecookiepolicy, { 0 } },
+		{ 0,                     GDK_KEY_F11,    togglefullscreen, { 0 } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_o,      toggleinspector, { 0 } },
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_c,      toggle,     { .i = CaretBrowsing } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_f,      toggle,     { .i = FrameFlattening } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_g,      toggle,     { .i = Geolocation } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_s,      toggle,     { .i = JavaScript } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_i,      toggle,     { .i = LoadImages } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_v,      toggle,     { .i = Plugins } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_b,      toggle,     { .i = ScrollBars } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_m,      toggle,     { .i = Style } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_c,      toggle,     { .i = CaretBrowsing } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_f,      toggle,     { .i = FrameFlattening } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_g,      toggle,     { .i = Geolocation } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_s,      toggle,     { .i = JavaScript } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_i,      toggle,     { .i = LoadImages } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_v,      toggle,     { .i = Plugins } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_b,      toggle,     { .i = ScrollBars } },
+		{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_m,      toggle,     { .i = Style } },
+
+		/* Entry with 0 keyval to end list                   ignore unmapped? */
+		{ 0,                     0,              NULL,       { .b = FALSE } },
+	},
+	[MODE_NORMAL] = (Key[]) {
+		/* modifier              keyval          function    arg */
+		{ 0,                     GDK_KEY_i,      setmode,    { .i = MODE_INSERT } },
+
+		/* Entry with 0 keyval to end list                   ignore unmapped? */
+		{ 0,                     0,              NULL,       { .b = TRUE } },
+	}
 };
 
 /* button definitions */
