@@ -44,7 +44,7 @@
 #define CSETV(p, s)             [p] = (Parameter){ { .v = s }, 1 }
 #define CSETF(p, s)             [p] = (Parameter){ { .f = s }, 1 }
 
-enum { AtomFind, AtomGo, AtomUri, AtomLast };
+enum { AtomFind, AtomGo, AtomUri, AtomMode, AtomLast };
 
 enum {
 	OnDoc   = WEBKIT_HIT_TEST_RESULT_CONTEXT_DOCUMENT,
@@ -279,6 +279,7 @@ setup(void)
 	atoms[AtomFind] = XInternAtom(dpy, "_SURF_FIND", False);
 	atoms[AtomGo] = XInternAtom(dpy, "_SURF_GO", False);
 	atoms[AtomUri] = XInternAtom(dpy, "_SURF_URI", False);
+	atoms[AtomMode] = XInternAtom(dpy, "_SURF_MODE", False);
 
 	gtk_init(NULL, NULL);
 
@@ -1093,6 +1094,9 @@ processx(GdkXEvent *e, GdkEvent *event, gpointer d)
 				loaduri(c, &a);
 
 				return GDK_FILTER_REMOVE;
+			} else if (ev->atom == atoms[AtomMode]) {
+				a.i = strtol(getatom(c, AtomMode), NULL, 0);
+				setmode(c, &a);
 			}
 		}
 	}
